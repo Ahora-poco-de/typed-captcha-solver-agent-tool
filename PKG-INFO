@@ -1,0 +1,205 @@
+Metadata-Version: 2.4
+Name: typed-captcha-solver-agent-tool
+Version: 0.1.0
+Summary: A typed, mock-first CAPTCHA solving tool contract for authorized AI agent workflows.
+License: MIT
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"
+Dynamic: license-file
+
+<div align="center">
+
+# Design a Typed CAPTCHA Solver Tool for AI Agents
+
+![Cover showing a typed CAPTCHA solver tool workflow for AI agents](assets/cover.png)
+
+[![Tests](https://img.shields.io/badge/tests-10%20passed-2ea44f)](#testing) [![Python](https://img.shields.io/badge/python-3.11%2B-3776ab)](pyproject.toml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+A framework-neutral Python example that validates model-produced arguments before one bounded CAPTCHA solving call.
+
+[English](README.md) · [简体中文](docs/zh-CN/README.md) · [日本語](docs/ja/README.md) · [Español](docs/es/README.md) · [Português](docs/pt-BR/README.md) · [한국어](docs/ko/README.md)
+
+</div>
+
+## Introduction
+
+AI agents can call tools with missing fields, unexpected values, duplicate request IDs, or targets outside the approved scope. A CAPTCHA solver tool therefore needs more than an HTTP request: it needs a contract that rejects unsafe or malformed arguments before any external call occurs.
+
+This repository shows how to expose [CapSolver](https://www.capsolver.com/?utm_source=github&utm_medium=referral&utm_campaign=typed-captcha-solver-agent-tool&utm_content=repository-readme) as a typed, framework-neutral function tool for an owned QA environment. The example uses the documented synchronous `ImageToTextTask` contract, a strict JSON Schema, an exact-origin allowlist, a one-call budget, idempotent request IDs, and structured results. Tests use an injected fixture client and never send a real key or image.
+
+## Demo
+
+```console
+$ python examples/basic_usage.py
+solve_authorized_image_captcha
+{'schema_version': '1.0', 'request_id': 'demo-001', 'status': 'solved', 'text': 'QA42', 'stop_reason': None, 'task_id': 'fixture-task-1'}
+```
+
+## Features
+
+- Framework-neutral function-tool JSON Schema.
+- Versioned input and output envelopes.
+- Unknown-field rejection and base64 size validation.
+- Written-authorization reference and exact-origin allowlist.
+- One-call default budget and duplicate request protection.
+- Redacted, structured stop and error reasons.
+- Mock-first tests with no network, key, browser, or live target.
+
+## How It Works
+
+1. An agent proposes arguments that match the published schema.
+2. `SolveRequest` rejects missing, unknown, oversized, or invalid values.
+3. `TypedCaptchaSolverTool` checks the approved origin, request ID, and remaining call budget.
+4. The injected client handles the request. Tests use a fixture client.
+5. The tool returns a stable `solved`, `stopped`, or `error` envelope to the agent.
+
+The production adapter maps the validated request to the official [`createTask` API](https://docs.capsolver.com/en/guide/api-createtask/) with `ImageToTextTask`. The [ImageToTextTask specification](https://docs.capsolver.com/en/guide/recognition/ImageToTextTask/) states that this recognition task returns its result synchronously from `createTask`, so this implementation does not poll `getTaskResult`.
+
+## Architecture
+
+```text
+model arguments
+      │
+      ▼
+JSON Schema + Python validation
+      │
+      ▼
+authorization + origin + budget + idempotency
+      │
+      ▼
+injected fixture or CapSolver ImageToText client
+      │
+      ▼
+typed result envelope
+```
+
+## Quick Start
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -e '.[dev]'
+pytest -q
+python scripts/smoke.py
+```
+
+No API key is needed for the tests or demo.
+
+## Usage
+
+Publish the schema to the tool-calling framework of your choice:
+
+```python
+from typed_captcha_tool import tool_schema
+
+definition = tool_schema()
+```
+
+Create a bounded tool with a fixture or reviewed live client:
+
+```python
+tool = TypedCaptchaSolverTool(
+    client=my_client,
+    allowed_origins=frozenset({"https://qa.example.test"}),
+    max_calls=1,
+)
+
+result = tool.invoke(model_arguments)
+```
+
+Keep `CAPSOLVER_API_KEY` outside source control and outside model-visible context. Do not enable a live adapter until the target and authorization reference have been reviewed.
+
+## Example Output
+
+Successful result:
+
+```json
+{
+  "schema_version": "1.0",
+  "request_id": "demo-001",
+  "status": "solved",
+  "text": "QA42",
+  "stop_reason": null,
+  "task_id": "fixture-task-1"
+}
+```
+
+Rejected origin:
+
+```json
+{
+  "schema_version": "1.0",
+  "request_id": "demo-002",
+  "status": "stopped",
+  "text": null,
+  "stop_reason": "origin_not_allowed",
+  "task_id": null
+}
+```
+
+## Supported Scenarios
+
+- Owned QA pages with synthetic text-image checkpoints.
+- Authorized RPA flows with a documented target origin.
+- Agent-tool contract testing with offline fixtures.
+- Schema evaluation for frameworks that accept JSON function definitions.
+
+This repository intentionally does not automate account creation, login, private-data access, unrestricted collection, or interactions with unknown targets.
+
+## Project Structure
+
+```text
+src/typed_captcha_tool/  schema, validation, client, and tool boundary
+examples/                offline runnable example
+tests/                   schema, policy, client, and error tests
+scripts/smoke.py         end-to-end fixture smoke test
+docs/                    localized READMEs
+```
+
+## Testing
+
+`pytest -q` covers the schema contract, successful fixture flow, unknown fields, version mismatch, origin enforcement, idempotency, call budget, redacted client errors, official request shape, and API-error handling.
+
+```bash
+pytest -q
+python scripts/smoke.py
+python -m compileall -q src examples tests
+```
+
+## Troubleshooting
+
+**The tool returns `origin_not_allowed`.** Add only the exact origin covered by your written authorization. Paths and wildcards are intentionally unsupported.
+
+**The tool returns `duplicate_request_id`.** Generate one stable ID per intended call. Replaying the same ID is stopped before the client runs.
+
+**The tool returns `call_budget_exhausted`.** Start a separately reviewed tool run instead of raising the budget dynamically from model output.
+
+**The API response is not `ready`.** Recheck the selected task type against the official documentation. `ImageToTextTask` is synchronous in this example.
+
+## Responsible Use
+
+Use this project only for systems you own or are explicitly authorized to test. Keep target origins narrow, retain the authorization reference outside the model prompt, cap tool calls, and stop for human review when the schema, origin, or response differs from the expected contract. Do not use the example to access private or restricted information, defeat risk controls, create accounts in bulk, or avoid platform enforcement. Technical capability does not grant permission to automate a target.
+
+## Contributing
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md). Changes must preserve offline tests, strict validation, explicit authorization, bounded calls, and redacted errors.
+
+## Security
+
+Read [SECURITY.md](SECURITY.md) before reporting a vulnerability. Never include keys, image payloads, task identifiers, authorization records, or browser session data in an issue.
+
+## Conclusion
+
+A useful agent tool contract makes invalid work easy to stop and valid work easy to audit. This example separates framework integration, local policy checks, and the documented synchronous image-recognition request so each part can be reviewed and tested independently with [CapSolver](https://www.capsolver.com/?utm_source=github&utm_medium=referral&utm_campaign=typed-captcha-solver-agent-tool&utm_content=repository-readme).
+
+## Maintainer Note
+
+Developer sharing CapSolver integration examples.
+
+## License
+
+[MIT](LICENSE)
+

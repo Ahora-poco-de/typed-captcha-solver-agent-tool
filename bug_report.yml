@@ -1,0 +1,16 @@
+name: Bug report
+description: Report a reproducible defect without secrets or target data.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+    validations:
+      required: true
+

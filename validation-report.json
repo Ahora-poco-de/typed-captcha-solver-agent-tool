@@ -1,0 +1,17 @@
+{
+  "status": "READY",
+  "validated_at": "2026-09-21T16:55:00+08:00",
+  "keyword_record": 83,
+  "entity_deduplication": "framework-neutral typed agent tool; no duplicate entity required",
+  "slug_deduplication": "no exact local or public match found",
+  "intent_deduplication": "distinct focus on schema versioning, unknown-field rejection, and typed results",
+  "unit_tests": "10 passed",
+  "smoke_test": "passed",
+  "compile": "passed",
+  "repository_validator": "passed",
+  "link_validation": "passed",
+  "secret_scan": "passed",
+  "policy_scan": "passed",
+  "live_api_call": false,
+  "runtime_note": "Official request contract verified; tests use an injected offline transport."
+}

@@ -1,0 +1,15 @@
+LICENSE
+README.md
+pyproject.toml
+src/typed_captcha_solver_agent_tool.egg-info/PKG-INFO
+src/typed_captcha_solver_agent_tool.egg-info/SOURCES.txt
+src/typed_captcha_solver_agent_tool.egg-info/dependency_links.txt
+src/typed_captcha_solver_agent_tool.egg-info/requires.txt
+src/typed_captcha_solver_agent_tool.egg-info/top_level.txt
+src/typed_captcha_tool/__init__.py
+src/typed_captcha_tool/client.py
+src/typed_captcha_tool/models.py
+src/typed_captcha_tool/schema.py
+src/typed_captcha_tool/tool.py
+tests/test_client.py
+tests/test_tool.py

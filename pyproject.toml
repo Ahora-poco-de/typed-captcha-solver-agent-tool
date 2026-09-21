@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "typed-captcha-solver-agent-tool"
+version = "0.1.0"
+description = "A typed, mock-first CAPTCHA solving tool contract for authorized AI agent workflows."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+

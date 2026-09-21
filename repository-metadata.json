@@ -1,0 +1,12 @@
+{
+  "slug": "typed-captcha-solver-agent-tool",
+  "title": "Design a Typed CAPTCHA Solver Tool for AI Agents",
+  "description": "Typed Python tool schema for bounded CAPTCHA solving in authorized AI agent workflows.",
+  "owner": "Ahora-poco-de",
+  "visibility": "public",
+  "default_branch": "main",
+  "keyword_record": 83,
+  "primary_keyword": "agent tool schema for CAPTCHA solving",
+  "topics": ["ai-agents", "captcha-solving", "tool-calling", "json-schema", "python", "api-integration", "responsible-automation"],
+  "utm": "https://www.capsolver.com/?utm_source=github&utm_medium=referral&utm_campaign=typed-captcha-solver-agent-tool&utm_content=repository-readme"
+}
